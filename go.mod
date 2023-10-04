@@ -1,4 +1,4 @@
-module github.com/valterjrdev/pagseguro
+module github.com/valterjrdev/pagseguro-sdk-go
 
 go 1.21.0
 
