@@ -10,6 +10,7 @@ go get github.com/valterjrdev/pagseguro
 ## Usage
 
 #### 1° - Import
+```go
 import (
 	"github.com/valterjrdev/pagseguro"
 	"github.com/valterjrdev/pagseguro/orders"
