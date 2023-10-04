@@ -9,22 +9,19 @@ go get github.com/valterjrdev/pagseguro
 
 ## Usage
 
-1° - Import
----
+#### 1° - Import
 import (
 	"github.com/valterjrdev/pagseguro"
 	"github.com/valterjrdev/pagseguro/orders"
 )
 ```
 
-2° - initialize the client
----
+#### 2° - initialize the client
 ```go
 client := pagseguro.New(pagseguro.SandboxEnvironment, "{YOUR TOKEN HERE}")
 ```
 
-3° - Create your request
----
+#### 3° - Create your request (Boleto)
 ```go
 request := &orders.Order{
 		ReferenceID: "ex-00001",
@@ -109,9 +106,7 @@ request := &orders.Order{
 	}
 ```
 
-4° - Check the response in the request object
----
-
+#### 4° - Check the response in the request object
 ```go
 log.Println(request.Charges)
 ```
