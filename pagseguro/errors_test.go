@@ -10,7 +10,11 @@ import (
 )
 
 func TestPagseguro_Error(t *testing.T) {
-	err := newError(http.StatusInternalServerError, "err custom", errors.New("err internal"))
+	err := &Error{
+		message:    "err custom",
+		err:        errors.New("err internal"),
+		statusCode: http.StatusInternalServerError,
+	}
 	assert.Equal(t, "status code: 500, message: err custom", err.Error())
 	assert.EqualError(t, err.Unwrap(), "err internal")
 }

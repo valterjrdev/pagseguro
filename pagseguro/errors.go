@@ -26,14 +26,6 @@ type (
 	}
 )
 
-func newError(statusCode int, message string, err error) *Error {
-	return &Error{
-		message:    message,
-		err:        err,
-		statusCode: statusCode,
-	}
-}
-
 func (c Error) Error() string {
 	return fmt.Sprintf("status code: %d, message: %s", c.statusCode, c.message)
 }

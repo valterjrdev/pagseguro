@@ -12,8 +12,7 @@ go get github.com/valterjrdev/pagseguro
 #### Import
 ```go
 import (
-	"github.com/valterjrdev/pagseguro"
-	"github.com/valterjrdev/pagseguro/orders"
+	"github.com/valterjrdev/pagseguro-sdk-go/pagseguro"
 )
 ```
 
@@ -24,7 +23,7 @@ client := pagseguro.New(pagseguro.SandboxEnvironment, "{YOUR TOKEN HERE}")
 
 #### Create your request (Boleto)
 ```go
-request := &orders.Order{
+	order := &pagseguro.Order{
 		ReferenceID: "ex-00001",
 		Customer: orders.Customer{
 			Name:  "Jose da Silva",
@@ -100,7 +99,7 @@ request := &orders.Order{
 	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
     defer cancel()
 
-	err := c.Send(ctx, request)
+	err := client.CreateOrder(ctx, order)
 	if err != nil {
 		log.Println(err)
 		return
@@ -109,7 +108,7 @@ request := &orders.Order{
 
 #### Check the response in the request object
 ```go
-log.Println(request.Charges)
+log.Println(order.Charges)
 ```
 
 
