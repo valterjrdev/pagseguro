@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"slices"
-	"time"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -26,17 +25,17 @@ type (
 	}
 )
 
-func New(baseUrl string, token string, timeout time.Duration) Default {
+func New(baseUrl string, token string) Default {
 	client := resty.New()
 	client.SetHeader("Authorization", token)
 	client.SetBaseURL(baseUrl)
-	client.SetTimeout(timeout)
 
 	return Default{client: client}
 }
 
 func (d Default) Send(ctx context.Context, req Request) error {
 	response, err := d.client.R().
+		SetContext(ctx).
 		SetBody(req).
 		SetResult(req).
 		SetError(&json.RawMessage{}).
