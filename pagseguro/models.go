@@ -1,9 +1,5 @@
 package pagseguro
 
-import (
-	"time"
-)
-
 type (
 	Amount struct {
 		Value    int64   `json:"value,omitempty"`
@@ -96,8 +92,8 @@ type (
 		NotificationUrls []string          `json:"notification_urls,omitempty"`
 		Links            []Links           `json:"links,omitempty"`
 		NotificationURL  []string          `json:"notification_url,omitempty"`
-		CreatedAt        time.Time         `json:"created_at,omitempty"`
-		PaidAt           time.Time         `json:"paid_at,omitempty"`
+		CreatedAt        string            `json:"created_at,omitempty"`
+		PaidAt           string            `json:"paid_at,omitempty"`
 	}
 )
 
