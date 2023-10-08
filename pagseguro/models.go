@@ -46,6 +46,7 @@ type (
 		ExpMonth     string `json:"exp_month,omitempty"`
 		ExpYear      string `json:"exp_year,omitempty"`
 		SecurityCode string `json:"security_code,omitempty"`
+		Store        bool   `json:"store,omitempty"`
 	}
 
 	InstructionLines struct {
