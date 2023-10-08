@@ -8,19 +8,18 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
-	"github.com/valterjrdev/pagseguro-sdk-go/pagseguro/models"
 )
 
 func TestPagseguro_Client(t *testing.T) {
-	t.Run("create order", func(t *testing.T) {
+	t.Run("create order (Boleto)", func(t *testing.T) {
 		token := gofakeit.LetterN(60)
-		order := &models.Order{
+		order := &Order{
 			ReferenceID: "ex-00001",
-			Customer: models.Customer{
+			Customer: Customer{
 				Name:  "Jose da Silva",
 				Email: "email@gmail.com",
 				TaxID: "12345678909",
-				Phones: []models.Phone{
+				Phones: []Phone{
 					{
 						Country: "55",
 						Area:    "11",
@@ -29,7 +28,7 @@ func TestPagseguro_Client(t *testing.T) {
 					},
 				},
 			},
-			Items: []models.Item{
+			Items: []Item{
 				{
 					ReferenceID: "referencia do item",
 					Name:        "nome do item",
@@ -37,8 +36,8 @@ func TestPagseguro_Client(t *testing.T) {
 					UnitAmount:  500,
 				},
 			},
-			Shipping: models.Shipping{
-				Address: models.Address{
+			Shipping: Shipping{
+				Address: Address{
 					Street:     "Avenida Brigadeiro Faria Lima",
 					Number:     "1384",
 					Locality:   "Pinheiros",
@@ -50,27 +49,27 @@ func TestPagseguro_Client(t *testing.T) {
 				},
 			},
 			NotificationUrls: []string{"https://meusite.com/notificacoes"},
-			Charges: []models.Charge{
+			Charges: []Charge{
 				{
 					ReferenceID: "referencia da cobranca",
 					Description: "descricao da cobranca",
-					Amount: models.Amount{
+					Amount: Amount{
 						Value:    500,
 						Currency: "BRL",
 					},
-					PaymentMethod: models.PaymentMethod{
+					PaymentMethod: PaymentMethod{
 						Type: "BOLETO",
-						Boleto: models.Boleto{
+						Boleto: Boleto{
 							DueDate: "2024-12-31",
-							InstructionLines: models.InstructionLines{
+							InstructionLines: InstructionLines{
 								Line1: "Pagamento processado para DESC Fatura",
 								Line2: "Via PagSeguro",
 							},
-							Holder: models.Holder{
+							Holder: Holder{
 								Name:  "Jose da Silva",
 								TaxID: "22222222222",
 								Email: "jose@email.com",
-								Address: models.Address{
+								Address: Address{
 									Country:    "Brasil",
 									Region:     "São Paulo",
 									RegionCode: "SP",
@@ -89,6 +88,9 @@ func TestPagseguro_Client(t *testing.T) {
 
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, token, r.Header.Get("Authorization"))
+			assert.Equal(t, createOrderEndpoint, r.URL.Path)
+			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+			assert.Equal(t, "application/json", r.Header.Get("Accept"))
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusCreated)
@@ -99,7 +101,7 @@ func TestPagseguro_Client(t *testing.T) {
 
 		client := New(srv.URL, token)
 		err := client.CreateOrder(context.Background(), order)
-		assert.EqualError(t, err, "")
+		assert.NoError(t, err)
 	})
 
 	t.Run("error responses", func(t *testing.T) {
@@ -119,7 +121,7 @@ func TestPagseguro_Client(t *testing.T) {
 			defer srv.Close()
 
 			client := New(srv.URL, "")
-			err := client.CreateOrder(context.Background(), &models.Order{})
+			err := client.CreateOrder(context.Background(), &Order{})
 			assert.EqualError(t, err, "error processing request(http status code: 400)")
 			assert.Equal(
 				t,
@@ -155,7 +157,7 @@ func TestPagseguro_Client(t *testing.T) {
 			defer srv.Close()
 
 			client := New(srv.URL, "")
-			err := client.CreateOrder(context.Background(), &models.Order{})
+			err := client.CreateOrder(context.Background(), &Order{})
 			assert.EqualError(t, err, "error processing request(http status code: 400)")
 			assert.Equal(
 				t,
@@ -177,7 +179,7 @@ func TestPagseguro_Client(t *testing.T) {
 			defer srv.Close()
 
 			client := New(srv.URL, "")
-			err := client.CreateOrder(context.Background(), &models.Order{})
+			err := client.CreateOrder(context.Background(), &Order{})
 			assert.EqualError(t, err, "error processing request(http status code: 500): non-standard error response, contact pagseguro support")
 		})
 
@@ -195,7 +197,7 @@ func TestPagseguro_Client(t *testing.T) {
 			defer srv.Close()
 
 			client := New(srv.URL, "")
-			err := client.CreateOrder(context.Background(), &models.Order{})
+			err := client.CreateOrder(context.Background(), &Order{})
 			assert.EqualError(t, err, "error processing request(http status code: 400): non-standard error response, contact pagseguro support")
 		})
 	})

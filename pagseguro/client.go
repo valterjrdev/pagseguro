@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/valterjrdev/pagseguro-sdk-go/pagseguro/models"
 )
 
 const (
@@ -13,9 +12,13 @@ const (
 	ProductionEnvironment = "https://api.pagseguro.com"
 )
 
+const (
+	createOrderEndpoint = "/orders"
+)
+
 type (
-	Order interface {
-		CreateOrder(ctx context.Context, order *models.Order) error
+	Client interface {
+		CreateOrder(ctx context.Context, order *Order) error
 	}
 )
 
@@ -35,13 +38,13 @@ func New(baseUrl string, token string) Default {
 	return Default{client: client}
 }
 
-func (d Default) CreateOrder(ctx context.Context, order *models.Order) error {
+func (d Default) CreateOrder(ctx context.Context, order *Order) error {
 	response, err := d.client.R().
 		SetContext(ctx).
 		SetBody(order).
 		SetResult(order).
 		SetError(&json.RawMessage{}).
-		Post("/orders")
+		Post(createOrderEndpoint)
 
 	return d.handler(response, err)
 }
