@@ -3,10 +3,9 @@ package pagseguro
 import (
 	"context"
 	"encoding/json"
-	"net/http"
-	"slices"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/valterjrdev/pagseguro-sdk-go/pagseguro/models"
 )
 
 const (
@@ -15,8 +14,8 @@ const (
 )
 
 type (
-	Client interface {
-		CreateOrder(ctx context.Context, order *Order) error
+	Order interface {
+		CreateOrder(ctx context.Context, order *models.Order) error
 	}
 )
 
@@ -28,13 +27,15 @@ type (
 
 func New(baseUrl string, token string) Default {
 	client := resty.New()
-	client.SetHeader("Authorization", token)
 	client.SetBaseURL(baseUrl)
+	client.SetHeader("Authorization", token)
+	client.SetHeader("Content-Type", "application/json")
+	client.SetHeader("Accept", "application/json")
 
 	return Default{client: client}
 }
 
-func (d Default) CreateOrder(ctx context.Context, order *Order) error {
+func (d Default) CreateOrder(ctx context.Context, order *models.Order) error {
 	response, err := d.client.R().
 		SetContext(ctx).
 		SetBody(order).
@@ -47,32 +48,17 @@ func (d Default) CreateOrder(ctx context.Context, order *Order) error {
 
 func (d Default) handler(response *resty.Response, err error) error {
 	if err != nil {
-		return &Error{
-			message:    "failed to send request",
-			err:        err,
-			statusCode: response.StatusCode(),
+		return &ApiErrors{
+			err:            err,
+			httpStatusCode: response.StatusCode(),
 		}
 	}
 
-	if response.IsSuccess() {
-		return nil
+	if response.IsError() {
+		errsResponse := &ApiErrors{httpStatusCode: response.StatusCode()}
+		errsResponse.Parse(*response.Error().(*json.RawMessage))
+		return errsResponse
 	}
 
-	httpStatusResponseBadRequest := []int{
-		http.StatusBadRequest,
-		http.StatusUnauthorized,
-		http.StatusForbidden,
-		http.StatusNotFound,
-		http.StatusConflict,
-	}
-	if slices.Contains(httpStatusResponseBadRequest, response.StatusCode()) {
-		errs := &ApiErrors{}
-		errs.Parse(*response.Error().(*json.RawMessage))
-		return errs
-	}
-
-	return &Error{
-		message:    "internal server error",
-		statusCode: response.StatusCode(),
-	}
+	return nil
 }

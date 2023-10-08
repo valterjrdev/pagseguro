@@ -2,16 +2,7 @@ package pagseguro
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-)
-
-type (
-	Error struct {
-		message    string
-		err        error
-		statusCode int
-	}
 )
 
 type (
@@ -23,36 +14,36 @@ type (
 
 	ApiErrors struct {
 		ErrorMessages []ApiError `json:"error_messages,omitempty"`
+
+		err            error
+		httpStatusCode int
 	}
 )
 
-func (c Error) Error() string {
-	return fmt.Sprintf("status code: %d, message: %s", c.statusCode, c.message)
-}
-
-func (c Error) Unwrap() error {
-	return c.err
-}
-
 func (e ApiError) Error() string {
-	return fmt.Sprintf("code: %s, desc: %s, parameter: %s;", e.Code, e.Description, e.ParameterName)
+	return fmt.Sprintf("code: %s, desc: %s, parameter: %s", e.Code, e.Description, e.ParameterName)
+}
+
+func (e ApiErrors) Unwrap() error {
+	return e.err
 }
 
 func (e ApiErrors) Error() string {
-	var errs []error
-	for _, err := range e.ErrorMessages {
-		errs = append(errs, err)
+	if len(e.ErrorMessages) == 0 {
+		return fmt.Sprintf("error processing request(http status code: %d): non-standard error response, contact pagseguro support", e.httpStatusCode)
 	}
 
-	return errors.Join(errs...).Error()
+	return fmt.Sprintf("error processing request(http status code: %d)", e.httpStatusCode)
 }
 
 func (e *ApiErrors) Parse(data json.RawMessage) {
-	_ = json.Unmarshal(data, e)
+	apiError := ApiError{}
+	e.ErrorMessages = make([]ApiError, 0)
 
-	if len(e.ErrorMessages) == 0 {
-		var err ApiError
-		_ = json.Unmarshal(data, &err)
-		e.ErrorMessages = append(e.ErrorMessages, err)
+	_ = json.Unmarshal(data, e)
+	_ = json.Unmarshal(data, &apiError)
+
+	if apiError.Code != "" {
+		e.ErrorMessages = append(e.ErrorMessages, apiError)
 	}
 }
