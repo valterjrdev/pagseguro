@@ -43,6 +43,7 @@ type (
 	Card struct {
 		Holder       Holder `json:"holder,omitempty"`
 		Number       string `json:"number,omitempty"`
+		Encrypted    string `json:"encrypted,omitempty"`
 		ExpMonth     string `json:"exp_month,omitempty"`
 		ExpYear      string `json:"exp_year,omitempty"`
 		SecurityCode string `json:"security_code,omitempty"`
